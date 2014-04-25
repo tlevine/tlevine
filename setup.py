@@ -12,4 +12,7 @@ setup(name='tlevine',
       tests_require = ['nose'],
       version=__version__,
       license='AGPL',
+      classifiers=[
+          'Programming Language :: Python :: 3.4'
+      ],
 )

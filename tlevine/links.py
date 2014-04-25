@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import re
 import sys
 import itertools
@@ -6,8 +5,6 @@ import json
 
 import lxml.html
 from picklecache import get
-
-__version__ = '0.0.1'
 
 def github():
     def pages():

@@ -6,10 +6,10 @@ import json
 import lxml.html
 from picklecache import get
 
-def github():
+def github(username):
     def pages():
         for page_number in itertools.count(1):
-            response = get('https://api.github.com/users/tlevine/repos?page=%d' % page_number)
+            response = get('https://api.github.com/users/%s/repos?page=%d' % (username, page_number))
             yield json.loads(response.text)
 
     for page in itertools.takewhile(lambda r: r != [], pages()):
@@ -75,7 +75,10 @@ def manual():
     ]
 
 def main():
-    for link in itertools.chain(gitorious(), scraperwiki(), github(), thomaslevine(), manual()):
+    iter_github = list(map(github, ['tlevine', 'csv', 'csvsoundsystem', 'appgen', 'risley', 'mapshit']))
+    iter_other  = [gitorious(), scraperwiki(), thomaslevine(), manual()]
+    args = iter_other + iter_github
+    for link in itertools.chain(*args):
         try:
             sys.stdout.write('%s\n' % link)
         except BrokenPipeError:

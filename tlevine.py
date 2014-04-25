@@ -11,11 +11,11 @@ def github():
     def pages():
         for page_number in itertools.count(1):
             response = get('https://api.github.com/users/tlevine/repos?page=%d' % page_number)
-            for repository in json.loads(response.text):
-                yield repository['html_url']
+            yield json.loads(response.text)
 
-    for link in itertools.takewhile(lambda r: r != [], pages()):
-        yield link
+    for page in itertools.takewhile(lambda r: r != [], pages()):
+        for repository in page:
+            yield repository['html_url']
 
 def thomaslevine():
     url = 'http://thomaslevine.com/!/'
@@ -24,14 +24,15 @@ def thomaslevine():
     html.make_links_absolute(url)
     return (str(link) for link in html.xpath('//a/@href') if link.startswith(url))
 
-def scraperwiki():
-    for page_number in itertools.count(1):
-        url = 'https://classic.scraperwiki.com/profiles/tlevine/?page=%d' % page_number
-        response = get(url)
-        html = lxml.html.fromstring(response.text)
-        html.make_links_absolute(url)
-        for href in html.xpath('//li[@class="code_object_line"]/descendant::h3/a[position()=2]/@href'):
-            yield re.sub(r'index.html$', '', str(href))
+def scraperwiki(url = 'https://classic.scraperwiki.com/profiles/tlevine/index.html'):
+    response = get(url)
+    html = lxml.html.fromstring(response.text)
+    html.make_links_absolute(url)
+    for href in html.xpath('//li[@class="code_object_line"]/descendant::h3/a[position()=2]/@href'):
+        yield re.sub(r'index.html$', '', str(href))
+    nexts = html.xpath('//a[text()="Next »"]/@href')
+    if nexts != []:
+        yield from scraperwiki(nexts[0])
 
 def main():
     for link in itertools.chain(scraperwiki(), thomaslevine(), github()):

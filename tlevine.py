@@ -7,6 +7,8 @@ import json
 import lxml.html
 from picklecache import get
 
+__version__ = '0.0.1'
+
 def github():
     def pages():
         for page_number in itertools.count(1):

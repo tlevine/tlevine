@@ -75,7 +75,7 @@ def manual():
     ]
 
 def main():
-    for link in itertools.chain(gitorious(), scraperwiki(), thomaslevine(), github()):
+    for link in itertools.chain(gitorious(), scraperwiki(), github(), thomaslevine(), manual()):
         try:
             sys.stdout.write('%s\n' % link)
         except BrokenPipeError:

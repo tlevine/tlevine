@@ -33,6 +33,17 @@ def scraperwiki(url = 'https://classic.scraperwiki.com/profiles/tlevine/index.ht
     if nexts != []:
         yield from scraperwiki(nexts[0])
 
+def gitorious():
+    url = 'https://gitorious.org/tlevine.xml'
+    response = get(url)
+    project = lxml.html.fromstring(response.text.encode('utf-8'))
+    project.make_links_absolute(url)
+    for repository in project.xpath('//repository[owner[text()="tlevine"]]'):
+        yield 'https' + repository.xpath('clone_url/text()')[0][3:-4]
+
 def main():
-    for link in itertools.chain(scraperwiki(), thomaslevine(), github()):
-        sys.stdout.write('%s\n' % link)
+    for link in itertools.chain(gitorious(), scraperwiki(), thomaslevine(), github()):
+        try:
+            sys.stdout.write('%s\n' % link)
+        except BrokenPipeError:
+            break

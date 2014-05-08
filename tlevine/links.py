@@ -36,7 +36,8 @@ def scraperwiki(url = 'https://classic.scraperwiki.com/profiles/tlevine/index.ht
         yield re.sub(r'index.html$', '', str(href))
     nexts = html.xpath(u'//a[text()="Next »"]/@href')
     if nexts != []:
-        yield from scraperwiki(nexts[0])
+        for scraper in scraperwiki(nexts[0]):
+            yield scraper
 
 def gitorious():
     url = 'https://gitorious.org/tlevine.xml'

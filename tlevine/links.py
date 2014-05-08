@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 import os
 import re
 import sys
@@ -33,7 +34,7 @@ def scraperwiki(url = 'https://classic.scraperwiki.com/profiles/tlevine/index.ht
     html.make_links_absolute(url)
     for href in html.xpath('//li[@class="code_object_line"]/descendant::h3/a[position()=2]/@href'):
         yield re.sub(r'index.html$', '', str(href))
-    nexts = html.xpath('//a[text()="Next »"]/@href')
+    nexts = html.xpath(u'//a[text()="Next »"]/@href')
     if nexts != []:
         yield from scraperwiki(nexts[0])
 

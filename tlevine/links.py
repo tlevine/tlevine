@@ -1,10 +1,14 @@
+import os
 import re
 import sys
 import itertools
 import json
 
 import lxml.html
-from picklecache import get
+from picklecache import cache
+import requests
+
+get = cache(os.path.expanduser('~/.tlevine'))(requests.get)
 
 def github(username):
     def pages():

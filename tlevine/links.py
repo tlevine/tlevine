@@ -13,7 +13,12 @@ import lxml.html
 from picklecache import cache
 import requests
 
-get = cache(os.path.expanduser('~/.tlevine'))(requests.get)
+if sys.version > '3':
+    # Some lock object appeared, so caching is only supported in Python3
+    # Maybe caching should be disabled altogether anyway...
+    get = cache(os.path.expanduser('~/.tlevine'))(requests.get)
+else:
+    get = requests.get
 
 def github(username):
     def pages():
@@ -61,12 +66,12 @@ def manual():
         'https://chrome.google.com/webstore/detail/simple-webcam/cejgmnpegppdhkmmgmdobfelcdgfhkmo?hl=en',
     ]
 
-def main():
+def main(fp = sys.stdout):
     iter_github = list(map(github, ['tlevine', 'csv', 'csvsoundsystem', 'appgen', 'risley', 'mapshit']))
     iter_other  = [gitorious(), scraperwiki(), thomaslevine(), manual()]
     args = iter_other + iter_github
     for link in itertools.chain(*args):
         try:
-            sys.stdout.write('%s\n' % link)
+            fp.write('%s\n' % link)
         except BrokenPipeError:
             break

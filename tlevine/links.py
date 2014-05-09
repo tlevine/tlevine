@@ -10,14 +10,7 @@ except ImportError:
     import xmlrpc.client as xmlrpc_client
 
 import lxml.html
-import requests
-from picklecache import cache
-
-use_cache = True
-if use_cache:
-    get = cache(os.path.expanduser('~/.tlevine'))(requests.get)
-else:
-    get = requests.get
+from requests import get
 
 def github(username):
     def pages():

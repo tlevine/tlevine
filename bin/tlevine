@@ -5,6 +5,6 @@ import tlevine
 try:
     BrokenPipeError
 except NameError:
-    sys.excepthook = lambda *args: sys.exit(1)
+    pass # sys.excepthook = lambda *args: sys.exit(1)
 
 tlevine.main()

@@ -9,7 +9,10 @@ setup(name='tlevine',
       url='https://github.com/tlevine/tlevine',
       packages=['tlevine'],
       scripts=['bin/tlevine'],
-      install_requires = ['picklecache==0.0.3'],
+      install_requires = [
+          'picklecache==0.0.3',
+          'requests>==2.2.1'
+      ],
       tests_require = ['nose'],
       version=__version__,
       license='AGPL',

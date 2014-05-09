@@ -10,12 +10,11 @@ except ImportError:
     import xmlrpc.client as xmlrpc_client
 
 import lxml.html
-from picklecache import cache
 import requests
+from picklecache import cache
 
-if sys.version > '3':
-    # Some lock object appeared, so caching is only supported in Python3
-    # Maybe caching should be disabled altogether anyway...
+use_cache = True
+if use_cache:
     get = cache(os.path.expanduser('~/.tlevine'))(requests.get)
 else:
     get = requests.get
@@ -23,7 +22,8 @@ else:
 def github(username):
     def pages():
         for page_number in itertools.count(1):
-            response = get('https://api.github.com/users/%s/repos?page=%d' % (username, page_number))
+            url = 'https://api.github.com/users/%s/repos?page=%d' % (username, page_number)
+            response = get(url)
             yield json.loads(response.text)
 
     for page in itertools.takewhile(lambda r: r != [], pages()):

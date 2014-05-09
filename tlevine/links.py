@@ -10,7 +10,22 @@ except ImportError:
     import xmlrpc.client as xmlrpc_client
 
 import lxml.html
-from requests import get
+import requests
+from picklecache import cache
+
+use_cache = True
+if use_cache:
+    import datetime
+    cachedir = os.path.expanduser('~/.tlevine/%s' % datetime.date.today().isoformat())
+    get = cache(cachedir)(requests.get)
+    @cache(os.path.join(cachedir,'pypi'))
+    def pypi_packages():
+        client = xmlrpc_client.ServerProxy('http://pypi.python.org/pypi')
+        return client.user_packages('tlevine')
+else:
+    get = requests.get
+    def pypi_packages():
+        return xmlrpc_client.ServerProxy('http://pypi.python.org/pypi').user_packages('tlevine')
 
 def github(username):
     def pages():
@@ -50,8 +65,7 @@ def gitorious():
         yield 'https' + repository.xpath('clone_url/text()')[0][3:-4]
 
 def pypi():
-    client = xmlrpc_client.ServerProxy('http://pypi.python.org/pypi')
-    for role, package in client.user_packages('tlevine'):
+    for role, package in pypi_packages():
         yield 'https://pypi.python.org/pypi/%s' % package
 
 def manual():
@@ -61,7 +75,7 @@ def manual():
 
 def main(fp = sys.stdout):
     iter_github = list(map(github, ['tlevine', 'csv', 'csvsoundsystem', 'appgen', 'risley', 'mapshit']))
-    iter_other  = [gitorious(), scraperwiki(), thomaslevine(), manual()]
+    iter_other  = [pypi(), gitorious(), scraperwiki(), thomaslevine(), manual()]
     args = iter_other + iter_github
     for link in itertools.chain(*args):
         try:

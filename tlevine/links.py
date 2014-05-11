@@ -13,11 +13,18 @@ import lxml.html
 import requests
 from picklecache import cache
 
+try:
+    unicode
+except NameError:
+    unicode = str
+
 use_cache = True
 if use_cache:
     import datetime
+
     cachedir = os.path.expanduser('~/.tlevine/%s' % datetime.date.today().isoformat())
     get = cache(cachedir)(requests.get)
+
     @cache(os.path.join(cachedir,'pypi'))
     def pypi_packages():
         client = xmlrpc_client.ServerProxy('http://pypi.python.org/pypi')
@@ -43,14 +50,14 @@ def thomaslevine():
     response = get(url)
     html = lxml.html.fromstring(response.text)
     html.make_links_absolute(url)
-    return (str(link) for link in html.xpath('//a/@href') if link.startswith(url))
+    return (unicode(link) for link in html.xpath('//a/@href') if link.startswith(url))
 
 def scraperwiki(url = 'https://classic.scraperwiki.com/profiles/tlevine/index.html'):
     response = get(url)
     html = lxml.html.fromstring(response.text)
     html.make_links_absolute(url)
     for href in html.xpath('//li[@class="code_object_line"]/descendant::h3/a[position()=2]/@href'):
-        yield re.sub(r'index.html$', '', str(href))
+        yield re.sub(r'index.html$', '', unicode(href))
     nexts = html.xpath(u'//a[text()="Next »"]/@href')
     if nexts != []:
         for scraper in scraperwiki(nexts[0]):
@@ -64,6 +71,13 @@ def gitorious():
     for repository in project.xpath('//repository[owner[text()="tlevine"]]'):
         yield 'https' + repository.xpath('clone_url/text()')[0][3:-4]
 
+def npm():
+    url = 'https://www.npmjs.org/~tlevine'
+    response = get(url)
+    html = lxml.html.fromstring(response.text)
+    html.make_links_absolute(url)
+    return map(unicode, html.xpath('id("profile")/ul/li/a/@href'))
+
 def pypi():
     for role, package in pypi_packages():
         yield 'https://pypi.python.org/pypi/%s' % package
@@ -75,7 +89,7 @@ def manual():
 
 def main(fp = sys.stdout):
     iter_github = list(map(github, ['tlevine', 'csv', 'csvsoundsystem', 'appgen', 'risley', 'mapshit']))
-    iter_other  = [pypi(), gitorious(), scraperwiki(), thomaslevine(), manual()]
+    iter_other  = [npm(), pypi(), gitorious(), scraperwiki(), thomaslevine(), manual()]
     args = iter_other + iter_github
     for link in itertools.chain(*args):
         try:

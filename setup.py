@@ -11,7 +11,7 @@ setup(name='tlevine',
       scripts=['bin/tlevine'],
       install_requires = [
           'picklecache==0.0.3',
-          'requests>==2.2.1'
+          'requests>=2.2.1',
       ],
       tests_require = ['nose'],
       version=__version__,

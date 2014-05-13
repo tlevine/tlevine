@@ -12,6 +12,7 @@ setup(name='tlevine',
       install_requires = [
           'picklecache==0.0.3',
           'requests>=2.2.1',
+          'lxml',
       ],
       tests_require = ['nose'],
       version=__version__,

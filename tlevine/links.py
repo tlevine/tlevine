@@ -8,8 +8,8 @@ try:
     import xmlrpclib as xmlrpc_client
 except ImportError:
     import xmlrpc.client as xmlrpc_client
+from html.parser import HTMLParser
 
-import lxml.html
 import requests
 from picklecache import cache
 
@@ -34,6 +34,19 @@ else:
     def pypi_packages():
         return xmlrpc_client.ServerProxy('http://pypi.python.org/pypi').user_packages('tlevine')
 
+class HrefParser(HTMLParser):
+    def __init__(self):
+        self.hrefs = []
+    def handle_starttag(self, tag, attrs):
+        if tag == 'a' and 'href' in attrs:
+            self.hrefs.append(attrs['href'])
+
+def hrefs(html:str):
+    'Get the hrefs out of some html.'
+    hrefparser = HrefParser()
+    hrefparser.feed(html)
+    return hrefparser.hrefs
+
 def github(username):
     def pages():
         for page_number in itertools.count(1):
@@ -48,9 +61,9 @@ def github(username):
 def thomaslevine():
     url = 'http://thomaslevine.com/!/'
     response = get(url)
-    html = lxml.html.fromstring(response.text)
     html.make_links_absolute(url)
-    return (unicode(link) for link in html.xpath('//a/@href') if link.startswith(url))
+    for href in hrefs(response.text):
+        return unicode(href)
 
 def scraperwiki(url = 'https://classic.scraperwiki.com/profiles/tlevine/index.html'):
     response = get(url)

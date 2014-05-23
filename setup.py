@@ -1,7 +1,5 @@
 from distutils.core import setup
 
-from tlevine import __version__
-
 setup(name='tlevine',
       author='Thomas Levine',
       author_email='_@thomaslevine.com',
@@ -15,7 +13,7 @@ setup(name='tlevine',
           'lxml',
       ],
       tests_require = ['nose'],
-      version=__version__,
+      version='0.0.12',
       license='AGPL',
       classifiers=[
           'Programming Language :: Python :: 2.7',

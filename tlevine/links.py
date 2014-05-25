@@ -11,16 +11,17 @@ except ImportError:
 
 import lxml.html
 import requests
-from picklecache import cache
 
 try:
     unicode
 except NameError:
     unicode = str
 
-use_cache = True
+use_cache = False
 if use_cache:
     import datetime
+
+    from picklecache import cache
 
     cachedir = os.path.expanduser('~/.tlevine/%s' % datetime.date.today().isoformat())
     get = cache(cachedir)(requests.get)

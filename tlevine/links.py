@@ -32,20 +32,20 @@ if use_cache:
         try:
             return client.user_packages('tlevine')
         except Exception as e:
-            sys.stderr.write('Error from PyPI:\n%s' % e)
+            sys.stderr.write('Error from PyPI:\n%s\n' % e)
             raise
 else:
     def get(url):
         try:
             return requests.get(url)
         except Exception as e:
-            sys.stderr.write('Error at %s:\n%s' % (url, e))
+            sys.stderr.write('Error at %s:\n%s\n' % (url, e))
             raise
     def pypi_packages():
         try:
             return xmlrpc_client.ServerProxy('http://pypi.python.org/pypi').user_packages('tlevine')
         except Exception as e:
-            sys.stderr.write('Error from PyPI:\n%s' % e)
+            sys.stderr.write('Error from PyPI:\n%s\n' % e)
             raise
 
 def github(username):
@@ -57,7 +57,10 @@ def github(username):
             except:
                 pass
             else:
-                yield json.loads(response.text)
+                if response.ok:
+                    yield json.loads(response.text)
+                else:
+                    sys.stderr.write('%d response at %s\n' % (response.status_code, url))
 
     for page in itertools.takewhile(lambda r: r != [], pages()):
         for repository in page:

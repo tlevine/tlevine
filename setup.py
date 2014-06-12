@@ -13,7 +13,7 @@ setup(name='tlevine',
           'lxml',
       ],
       tests_require = ['nose'],
-      version='0.0.14',
+      version='0.0.15',
       license='AGPL',
       classifiers=[
           'Programming Language :: Python :: 2.7',

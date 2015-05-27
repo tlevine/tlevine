@@ -17,23 +17,24 @@ try:
 except NameError:
     unicode = str
 
-use_cache = False
+use_cache = True
 if use_cache:
     import datetime
 
-    from picklecache import cache
+    from vlermv import cache
 
     cachedir = os.path.expanduser('~/.tlevine/%s' % datetime.date.today().isoformat())
     get = cache(cachedir)(requests.get)
-
-    @cache(os.path.join(cachedir,'pypi'))
     def pypi_packages():
-        client = xmlrpc_client.ServerProxy('http://pypi.python.org/pypi')
-        try:
-            return client.user_packages('tlevine')
-        except Exception as e:
-            sys.stderr.write('Error from PyPI:\n%s\n' % e)
-            raise
+        @cache(cachedir)
+        def _pypi_packages(_):
+            client = xmlrpc_client.ServerProxy('http://pypi.python.org/pypi')
+            try:
+                return client.user_packages('tlevine')
+            except Exception as e:
+                sys.stderr.write('Error from PyPI:\n%s\n' % e)
+                raise
+        return _pypi_packages('pypi')
 else:
     def get(url):
         try:

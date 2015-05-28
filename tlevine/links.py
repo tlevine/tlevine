@@ -65,7 +65,8 @@ def github(username):
 
     for page in itertools.takewhile(lambda r: r != [], pages()):
         for repository in page:
-            yield repository['html_url']
+            print(repository)
+            yield repository['html_url'], None
 
 def thomaslevine():
     url = 'http://thomaslevine.com/!/'
@@ -76,7 +77,7 @@ def thomaslevine():
     else:
         html = lxml.html.fromstring(response.text)
         html.make_links_absolute(url)
-        return (unicode(link) for link in html.xpath('//a/@href') if link.startswith(url))
+        return ((unicode(a.attrib['href']), a.text_content()) for a in html.xpath('//a') if a.attrib['href'].startswith(url))
 
 def scraperwiki(url = 'https://classic.scraperwiki.com/profiles/tlevine/index.html'):
     try:
@@ -87,7 +88,7 @@ def scraperwiki(url = 'https://classic.scraperwiki.com/profiles/tlevine/index.ht
         html = lxml.html.fromstring(response.text)
         html.make_links_absolute(url)
         for href in html.xpath('//li[@class="code_object_line"]/descendant::h3/a[position()=2]/@href'):
-            yield re.sub(r'index.html$', '', unicode(href))
+            yield re.sub(r'index.html$', '', unicode(href)), 'A web scraper'
         nexts = html.xpath(u'//a[text()="Next »"]/@href')
         if nexts != []:
             for scraper in scraperwiki(nexts[0]):
@@ -103,33 +104,39 @@ def gitorious():
         project = lxml.html.fromstring(response.text.encode('utf-8'))
         project.make_links_absolute(url)
         for repository in project.xpath('//repository[owner[text()="tlevine"]]'):
-            yield 'https' + repository.xpath('clone_url/text()')[0][3:-4]
+            yield 'https' + repository.xpath('clone_url/text()')[0][3:-4], None
  
 def npm():
     url = 'https://www.npmjs.org/~tlevine'
     try:
         response = get(url)
     except:
-        return []
+        sys.stderr.write('Error loading NPM packages\n')
     else:
         html = lxml.html.fromstring(response.text)
         html.make_links_absolute(url)
-        return map(unicode, html.xpath('id("profile")/ul/li/a/@href'))
+        for li in html.xpath('id("profile")/ul/li'):
+            href = li.xpath('a/@href')[0]
+            text = ''.join(li.xpath('text()')).strip()
+            yield unicode(href), unicode(text)
  
 def pypi():
     for role, package in pypi_packages():
-        yield 'https://pypi.python.org/pypi/%s' % package
+        yield ('https://pypi.python.org/pypi/%s' % package), None
 
 def manual():
     return [
-        'https://chrome.google.com/webstore/detail/simple-webcam/cejgmnpegppdhkmmgmdobfelcdgfhkmo?hl=en',
+        ('https://chrome.google.com/webstore/detail/simple-webcam/cejgmnpegppdhkmmgmdobfelcdgfhkmo?hl=en', 'A webcam application for Chrome')
     ]
 
-def main(fp = sys.stdout):
+def tlevine():
     iter_github = list(map(github, ['tlevine', 'csv', 'csvsoundsystem', 'appgen', 'risley', 'mapshit']))
     iter_other  = [npm(), pypi(), gitorious(), scraperwiki(), thomaslevine(), manual()]
     args = iter_other + iter_github
-    for link in itertools.chain(*args):
+    return itertools.chain(*args)
+
+def main(fp = sys.stdout):
+    for link, description in tlevine():
         try:
             fp.write('%s\n' % link)
         except BrokenPipeError:

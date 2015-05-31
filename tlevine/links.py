@@ -13,6 +13,11 @@ except ImportError:
 import lxml.html
 import requests
 
+if 'GITHUB_ACCESS_TOKEN' in os.environ:
+    PARAMS = {'access_token': os.environ['GITHUB_ACCESS_TOKEN']}
+else:
+    sys.stderr.write('Set the GITHUB_ACCESS_TOKEN environment variable to remove rate limits.\n')
+
 try:
     unicode
 except NameError:
@@ -28,7 +33,7 @@ if use_cache:
     get = cache(cachedir)(requests.get)
     @cache(cachedir, 'github-readme')
     def readme(url):
-        return requests.get(url + '/readme')
+        return requests.get(url + '/readme', params = PARAMS)
     def pypi_packages():
         @cache(cachedir)
         def _pypi_packages(_):
@@ -42,12 +47,12 @@ if use_cache:
 else:
     def get(url):
         try:
-            return requests.get(url)
+            return requests.get(url, params = PARAMS)
         except Exception as e:
             sys.stderr.write('Error at %s:\n%s\n' % (url, e))
             raise
     def readme(url):
-        return requests.get(url + '/readme')
+        return requests.get(url + '/readme', params = PARAMS)
     def pypi_packages():
         try:
             return xmlrpc_client.ServerProxy('http://pypi.python.org/pypi').user_packages('tlevine')

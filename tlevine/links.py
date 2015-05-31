@@ -4,6 +4,7 @@ import re
 import sys
 import itertools
 import json
+import base64
 try:
     import xmlrpclib as xmlrpc_client
 except ImportError:
@@ -73,7 +74,9 @@ def github(username):
             r = readme(repository['url'])
             if r.ok:
                 full_readme = base64.b64decode(r.json()['content']).decode('utf-8')
-                description = '\n'.join(line for line in head.split('\n') if not line.startswith(' ')).strip().partition('\n\n')[0]
+                not_paragraph = (' ', '-', '=', '#')
+                paragraphs = '\n'.join(line for line in full_readme.split('\n') if not line.startswith(not_paragraph))
+                description = paragraphs.strip().partition('\n\n')[0]
             else:
                 description = ''
             yield repository['html_url'], description

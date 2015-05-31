@@ -1,8 +1,14 @@
 #!/usr/bin/env python
+import sys
+
 import tlevine
 
 HRULE = '--------------------------------------\n'
 def main():
-    for args in tlevine.tlevine():
-        sys.stdout.write(HRULE + '%s\n%s\n\n' % args)
+    for url, description in tlevine.tlevine():
+        if description:
+            sys.stdout.write(HRULE + '%s\n\n%s\n\n' % (url, description))
     sys.stdout.write(HRULE)
+
+if __name__ == '__main__':
+    main()

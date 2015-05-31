@@ -79,9 +79,7 @@ def github(username):
             r = readme(repository['url'])
             if r.ok:
                 full_readme = base64.b64decode(r.json()['content']).decode('utf-8')
-                not_paragraph = (' ', '-', '=', '#')
-                paragraphs = '\n'.join(line for line in full_readme.split('\n') if not line.startswith(not_paragraph))
-                description = paragraphs.strip().partition('\n\n')[0]
+                description = head(full_readme)
             else:
                 description = ''
             yield repository['html_url'], description
@@ -122,7 +120,10 @@ def gitorious():
         project = lxml.html.fromstring(response.text.encode('utf-8'))
         project.make_links_absolute(url)
         for repository in project.xpath('//repository[owner[text()="tlevine"]]'):
-            yield 'https' + repository.xpath('clone_url/text()')[0][3:-4], None
+            url = re.sub(r'.*://', 'https://', repository.xpath('clone_url/text()')[0])[:-4]
+            response2 = get(url + '.xml')
+            full_description = lxml.html.fromstring(response2.content).xpath('//description')[0].text_content()
+            yield url, head(full_description)
  
 def npm():
     url = 'https://www.npmjs.org/~tlevine'
@@ -159,3 +160,8 @@ def main(fp = sys.stdout):
             fp.write('%s\n' % link)
         except BrokenPipeError:
             break
+
+def head(full_readme):
+    not_paragraph = (' ', '-', '=', '#')
+    paragraphs = '\n'.join(line for line in full_readme.split('\n') if not line.startswith(not_paragraph))
+    return paragraphs.strip().partition('\n\n')[0]

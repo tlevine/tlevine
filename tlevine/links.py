@@ -141,7 +141,7 @@ def npm():
  
 def pypi():
     for role, package in pypi_packages():
-        yield ('https://pypi.python.org/pypi/%s' % package), None
+        yield ('https://pypi.python.org/pypi/%s' % package), ''
 
 def manual():
     return [

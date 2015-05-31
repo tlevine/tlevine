@@ -25,6 +25,9 @@ if use_cache:
 
     cachedir = os.path.expanduser('~/.tlevine/%s' % datetime.date.today().isoformat())
     get = cache(cachedir)(requests.get)
+    @cache(cachedir, 'github-readme')
+    def readme(url):
+        return requests.get(url + '/readme')
     def pypi_packages():
         @cache(cachedir)
         def _pypi_packages(_):
@@ -42,6 +45,8 @@ else:
         except Exception as e:
             sys.stderr.write('Error at %s:\n%s\n' % (url, e))
             raise
+    def readme(url):
+        return requests.get(url + '/readme')
     def pypi_packages():
         try:
             return xmlrpc_client.ServerProxy('http://pypi.python.org/pypi').user_packages('tlevine')
@@ -65,8 +70,13 @@ def github(username):
 
     for page in itertools.takewhile(lambda r: r != [], pages()):
         for repository in page:
-            print(repository)
-            yield repository['html_url'], None
+            r = readme(repository['url'])
+            if r.ok:
+                full_readme = base64.b64decode(r.json()['content']).decode('utf-8')
+                description = '\n'.join(line for line in head.split('\n') if not line.startswith(' ')).strip().partition('\n\n')[0]
+            else:
+                description = ''
+            yield repository['html_url'], description
 
 def thomaslevine():
     url = 'http://thomaslevine.com/!/'

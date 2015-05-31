@@ -13,12 +13,16 @@ IGNORE = (
 INVENTION = HRULE + '%s\n\n%s\n\n'
 
 def main():
-    # Manual
-    sys.stdout.write(INVENTION % ('https://classic.scraperwiki.com/profiles/tlevine/', 'Assorted web scrapers, for downloading data from websites'))
-
+    # Automatic
     for url, description in tlevine.tlevine():
         if not url.startswith(IGNORE) and description:
             sys.stdout.write(INVENTION % (url, description))
+
+    # Manual
+    sys.stdout.write(INVENTION % ('https://classic.scraperwiki.com/profiles/tlevine/', 'Assorted web scrapers, for downloading data from websites'))
+    sys.stdout.write(INVENTION % ('https://thomaslevine.com/!/', 'Assorted articles, mostly on data, computers, and typography'))
+
+    # End
     sys.stdout.write(HRULE)
 
 if __name__ == '__main__':

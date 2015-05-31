@@ -4,10 +4,21 @@ import sys
 import tlevine
 
 HRULE = '--------------------------------------\n'
+IGNORE = (
+    'http://thomaslevine.com',
+    'https://thomaslevine.com',
+    'https://classic.scraperwiki.com',
+    'https://github.com/csvsoundsystem',
+)
+INVENTION = HRULE + '%s\n\n%s\n\n'
+
 def main():
+    # Manual
+    sys.stdout.write(INVENTION % ('https://classic.scraperwiki.com/profiles/tlevine/', 'Assorted web scrapers, for downloading data from websites'))
+
     for url, description in tlevine.tlevine():
-        if description:
-            sys.stdout.write(HRULE + '%s\n\n%s\n\n' % (url, description))
+        if not url.startswith(IGNORE) and description:
+            sys.stdout.write(INVENTION % (url, description))
     sys.stdout.write(HRULE)
 
 if __name__ == '__main__':

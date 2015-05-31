@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+import tlevine
+
+HRULE = '--------------------------------------\n'
+def main():
+    for args in tlevine.tlevine():
+        sys.stdout.write(HRULE + '%s\n%s\n\n' % args)
+    sys.stdout.write(HRULE)

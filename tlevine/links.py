@@ -164,4 +164,4 @@ def main(fp = sys.stdout):
 def head(full_readme):
     not_paragraph = (' ', '-', '=', '#')
     paragraphs = '\n'.join(line for line in full_readme.split('\n') if not line.startswith(not_paragraph))
-    return paragraphs.strip().partition('\n\n')[0]
+    return paragraphs.strip().replace('\r', '').partition('\n\n')[0]
